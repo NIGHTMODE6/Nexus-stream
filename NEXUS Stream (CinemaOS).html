@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS Stream | CinemaOS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexusBg: '#080A0F',
+                        nexusCard: '#0f131d',
+                        electricPurple: '#7000FF',
+                        neonPink: '#FF007A',
+                        cyanGlow: '#00F0FF',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        glassBg: 'rgba(15, 19, 29, 0.75)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-purple': '0 0 20px rgba(112, 0, 255, 0.4)',
+                        'glow-pink': '0 0 20px rgba(255, 0, 122, 0.4)',
+                        'glow-cyan': '0 0 20px rgba(0, 240, 255, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styling for Glassmorphism & CinemaOS aesthetics */
+        body {
+            background-color: #080A0F;
+            color: #E2E8F0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(8, 10, 15, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7000FF;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(15, 19, 29, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-nav {
+            background: rgba(8, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-header {
+            background: rgba(8, 10, 15, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Hide Scrollbar for Horizontal Scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Number Rank Typography Overlay */
+        .rank-number {
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1;
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.8);
+            color: transparent;
+            text-shadow: 0 0 15px rgba(112, 0, 255, 0.5);
+        }
+
+        /* Pseudo Fullscreen Fallback */
+        .pseudo-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999999 !important;
+            background: #000 !important;
+            border-radius: 0 !important;
+            padding-top: 0 !important;
+            border: none !important;
+        }
+
+        /* Native Fullscreen Standard Overrides */
+        #playerWrapper:fullscreen,
+        #playerWrapper:-webkit-full-screen,
+        #playerWrapper:-moz-full-screen,
+        #playerWrapper:-ms-fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            padding-top: 0 !important;
+            border-radius: 0 !important;
+            border: none !important;
+            background: #000 !important;
+        }
+
+        #playerWrapper:fullscreen .aspect-video-content,
+        #playerWrapper:-webkit-full-screen .aspect-video-content,
+        #playerWrapper:-moz-full-screen .aspect-video-content,
+        #playerWrapper.pseudo-fullscreen .aspect-video-content {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Body locking when pseudo fullscreen is active */
+        body.fullscreen-active {
+            overflow: hidden !important;
+        }
+        body.fullscreen-active header,
+        body.fullscreen-active nav {
+            display: none !important;
+        }
+
+        /* Animated Pulsing Loader */
+        .pulse-loader {
+            animation: pulse-glow 1.8s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 0.9; transform: scale(1); }
+        }
+
+        /* High-FPS Shimmer Animation */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer-swipe 1.5s infinite linear;
+        }
+        @keyframes shimmer-swipe {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Micro Interactions & Spring Effects */
+        .interactive-card {
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            will-change: transform;
+        }
+        .interactive-card:active {
+            transform: scale(0.94);
+        }
+        @media (hover: hover) {
+            .interactive-card:hover {
+                transform: translateY(-5px) scale(1.02);
+            }
+        }
+
+        /* View Transition Animation */
+        .view-transition {
+            animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.97) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Low Performance Optimization Override */
+        body.perf-low .glass-panel, 
+        body.perf-low .glass-nav, 
+        body.perf-low .glass-header {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(15, 19, 29, 0.95) !important;
+        }
+        body.perf-low * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        /* Safe Area Padding for Notch & Gesture Bars */
+        .safe-pb {
+            padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+        }
+        .safe-pt {
+            padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+        }
+
+        /* Aspect 16/9 Ratio strictly */
+        .aspect-video-box {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+        .aspect-video-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gradient-overlay {
+            background: linear-gradient(180deg, rgba(8,10,15,0) 0%, rgba(8,10,15,0.7) 60%, rgba(8,10,15,1) 100%);
+        }
+
+        /* Netflix Custom Player Overlay & Animations */
+        .player-controls-overlay {
+            background: linear-gradient(0deg, rgba(8,10,15,0.95) 0%, rgba(8,10,15,0.4) 40%, rgba(8,10,15,0) 100%);
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .ripple-anim {
+            animation: ripple-pop 0.6s ease-out forwards;
+        }
+        @keyframes ripple-pop {
+            0% { opacity: 0.9; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(1.3); }
+        }
+    </style>
+</head>
+<body class="min-h-screen safe-pb text-gray-200 select-none bg-[#080A0F]">
+
+    <!-- APP HEADER -->
+    <header class="fixed top-0 left-0 right-0 z-40 glass-header px-4 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div onclick="navigateTo('home')" class="flex items-center gap-2 cursor-pointer group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-electricPurple via-neonPink to-cyanGlow p-[2px] shadow-glow-purple group-hover:rotate-6 transition-transform">
+                    <div class="w-full h-full bg-nexusBg rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-play text-xs text-transparent bg-clip-text bg-gradient-to-r from-neonPink to-cyanGlow"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-lg font-black tracking-wider text-white">NEXUS</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-widest text-cyanGlow block -mt-1 flex items-center gap-1">
+                        CinemaOS <span id="perfBadge" class="text-[8px] px-1 py-0.2 bg-electricPurple/30 text-electricPurple rounded hidden">AUTO</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Search Bar Input Container -->
+            <div class="relative flex-1 max-w-md">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 text-xs text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Search Anime, Web Series, Movies..." 
+                        oninput="handleSearchInput(event)"
+                        onfocus="showLiveSearchDropdown()"
+                        class="w-full bg-nexusCard/80 border border-glassBorder rounded-full py-1.5 pl-9 pr-8 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-electricPurple focus:ring-1 focus:ring-electricPurple transition-all"
+                    >
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 text-gray-400 hover:text-white text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Live Search Dropdown -->
+                <div id="liveSearchResults" class="hidden absolute top-full left-0 right-0 mt-2 glass-panel rounded-2xl p-2 shadow-2xl max-h-80 overflow-y-auto z-50">
+                    <div id="liveSearchContent" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Watchlist Counter Quick Link -->
+            <button onclick="navigateTo('watchlist')" class="relative p-2 rounded-xl glass-panel text-gray-300 hover:text-white hover:border-electricPurple transition active:scale-90">
+                <i class="fa-solid fa-bookmark text-sm"></i>
+                <span id="headerWatchlistBadge" class="absolute -top-1 -right-1 bg-neonPink text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-glow-pink transition-transform">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTENT CONTAINER -->
+    <main id="appContainer" class="safe-pt max-w-7xl mx-auto">
+        
+        <!-- ==================== CATALOG VIEW ==================== -->
+        <section id="catalogView" class="space-y-6 pb-6 view-transition">
+            
+            <!-- HERO BANNER -->
+            <div id="heroBanner" class="relative w-full h-[60vh] max-h-[520px] rounded-3xl overflow-hidden shadow-2xl transition-all duration-700">
+                <!-- Skeleton Loader -->
+                <div class="w-full h-full bg-nexusCard shimmer flex flex-col justify-end p-6 space-y-3">
+                    <div class="w-24 h-5 bg-gray-800 rounded-full"></div>
+                    <div class="w-3/4 h-8 bg-gray-800 rounded-xl"></div>
+                    <div class="w-1/2 h-4 bg-gray-800 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- GENRE/NAV FILTER CHIPS -->
+            <div class="px-4 flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                <button onclick="filterCategory('all')" class="chip-btn active px-4 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-electricPurple to-neonPink text-white shadow-glow-purple whitespace-nowrap active:scale-95 transition">🔥 All Featured</button>
+                <button onclick="filterCategory('movies')" class="chip-btn px-4 py-1.5 rounded-full text-xs font-semibold glass-panel text-gray-300 hover:text-white hover:border-neonPink whitespace-nowrap active:scale-95 transition">🎬 Movies</button>
+                <button onclick="filterCategory('anime')" class="chip-btn px-4 py-1.5 rounded-full text-xs font-semibold glass-panel text-gray-300 hover:text-white hover:border-cyanGlow whitespace-nowrap active:scale-95 transition">⛩️ Anime</button>
+                <button onclick="filterCategory('series')" class="chip-btn px-4 py-1.5 rounded-full text-xs font-semibold glass-panel text-gray-300 hover:text-white hover:border-electricPurple whitespace-nowrap active:scale-95 transition">📺 Web Series</button>
+                <button onclick="filterCategory('toprated')" class="chip-btn px-4 py-1.5 rounded-full text-xs font-semibold glass-panel text-gray-300 hover:text-white hover:border-neonPink whitespace-nowrap active:scale-95 transition">⭐ Highest Rated</button>
+            </div>
+
+            <!-- CONTINUE WATCHING ROW (DYNAMICALLY POPULATED) -->
+            <div id="continueWatchingSection" class="px-4 space-y-3 hidden">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-extrabold tracking-wide flex items-center gap-2 text-white">
+                        <span class="w-2 h-5 bg-gradient-to-b from-cyanGlow to-neonPink rounded-full inline-block"></span>
+                        CONTINUE WATCHING
+                    </h2>
+                    <button onclick="clearContinueWatching()" class="text-[11px] font-medium text-gray-400 hover:text-neonPink transition">Clear All</button>
+                </div>
+                <div id="continueWatchingRow" class="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
+                    <!-- Dynamic Continue Watching Items -->
+                </div>
+            </div>
+
+            <!-- TOP 10 RANKED ROW -->
+            <div class="px-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-extrabold tracking-wide flex items-center gap-2 text-white">
+                        <span class="w-2 h-5 bg-gradient-to-b from-neonPink to-electricPurple rounded-full inline-block"></span>
+                        TOP 10 TRENDING NOW
+                    </h2>
+                    <span class="text-[11px] font-medium text-cyanGlow tracking-wider uppercase">Global Rankings</span>
+                </div>
+                <div id="top10Row" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1">
+                    <!-- Dynamic Top 10 Cards -->
+                </div>
+            </div>
+
+            <!-- POPULAR ANIME ROW -->
+            <div class="px-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-extrabold tracking-wide flex items-center gap-2 text-white">
+                        <span class="w-2 h-5 bg-gradient-to-b from-cyanGlow to-electricPurple rounded-full inline-block"></span>
+                        TRENDING ANIME
+                    </h2>
+                    <button onclick="navigateTo('anime')" class="text-xs font-medium text-gray-400 hover:text-cyanGlow">See All <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+                <div id="animeRow" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                    <!-- Dynamic Anime Posters -->
+                </div>
+            </div>
+
+            <!-- POPULAR WEB SERIES ROW -->
+            <div class="px-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-extrabold tracking-wide flex items-center gap-2 text-white">
+                        <span class="w-2 h-5 bg-gradient-to-b from-electricPurple to-neonPink rounded-full inline-block"></span>
+                        POPULAR WEB SERIES
+                    </h2>
+                    <button onclick="navigateTo('series')" class="text-xs font-medium text-gray-400 hover:text-electricPurple">See All <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+                <div id="seriesRow" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                    <!-- Dynamic Web Series Posters -->
+                </div>
+            </div>
+
+            <!-- TOP RATED SHOWS ROW -->
+            <div class="px-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-extrabold tracking-wide flex items-center gap-2 text-white">
+                        <span class="w-2 h-5 bg-gradient-to-b from-neonPink to-cyanGlow rounded-full inline-block"></span>
+                        CRITICALLY ACCLAIMED
+                    </h2>
+                </div>
+                <div id="topRatedRow" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                    <!-- Dynamic Top Rated Posters -->
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ==================== SEARCH & GRID VIEW ==================== -->
+        <section id="gridView" class="hidden px-4 py-4 space-y-4 view-transition">
+            <div class="flex items-center justify-between">
+                <h2 id="gridTitle" class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-border-all text-electricPurple"></i> Search Results
+                </h2>
+                <span id="gridCount" class="text-xs text-gray-400">0 items found</span>
+            </div>
+            <div id="gridContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <!-- Dynamic Grid Content -->
+            </div>
+        </section>
+
+
+        <!-- ==================== DEDICATED PLAYER & DETAILS VIEW ==================== -->
+        <section id="playerDetailsView" class="hidden space-y-4 pb-8 view-transition">
+            
+            <!-- Sticky Details Sub-Header -->
+            <div class="px-4 py-2 flex items-center justify-between border-b border-glassBorder bg-nexusBg/90 backdrop-blur-md sticky top-14 z-30">
+                <button onclick="closePlayerView()" class="flex items-center gap-2 text-xs font-semibold text-gray-300 hover:text-white bg-nexusCard px-3 py-1.5 rounded-full border border-glassBorder active:scale-95 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+                <h3 id="playerHeaderTitle" class="text-xs font-bold text-white truncate max-w-[200px] text-center">Loading Content...</h3>
+                <button id="detailBookmarkBtn" onclick="toggleCurrentWatchlist()" class="p-2 rounded-full glass-panel text-gray-300 hover:text-neonPink transition active:scale-90">
+                    <i class="fa-regular fa-bookmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- VIDEO PLAYER CONTAINER (Fixed 16:9 Aspect Ratio Container) -->
+            <div class="px-0 sm:px-4">
+                <div id="playerWrapper" class="relative w-full aspect-video-box bg-black rounded-none sm:rounded-2xl overflow-hidden shadow-2xl border border-glassBorder group select-none">
+                    
+                    <!-- Player Engine Overlay / Loader -->
+                    <div id="playerLoadingState" class="absolute inset-0 bg-nexusCard/90 z-20 flex flex-col items-center justify-center gap-3">
+                        <div class="w-10 h-10 border-4 border-electricPurple border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs text-cyanGlow font-medium">Initializing CinemaOS Stream Engine...</span>
+                    </div>
+
+                    <!-- Visual Gesture Ripple Indicators -->
+                    <div id="rippleLeft" class="hidden absolute top-1/2 left-1/4 -translate-y-1/2 z-30 text-center text-white font-bold bg-black/60 px-4 py-2 rounded-full border border-neonPink ripple-anim">
+                        <i class="fa-solid fa-backward text-lg block"></i> -10s
+                    </div>
+                    <div id="rippleRight" class="hidden absolute top-1/2 right-1/4 -translate-y-1/2 z-30 text-center text-white font-bold bg-black/60 px-4 py-2 rounded-full border border-cyanGlow ripple-anim">
+                        <i class="fa-solid fa-forward text-lg block"></i> +10s
+                    </div>
+
+                    <!-- Landscape Fullscreen Button -->
+                    <button id="landscapeToggleBtn" onclick="toggleLandscapeMode()" class="absolute top-3 right-3 z-30 glass-panel hover:bg-electricPurple text-white px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1.5 shadow-lg border border-glassBorder transition active:scale-90">
+                        <i class="fa-solid fa-expand"></i>
+                        <span>⛶ Landscape</span>
+                    </button>
+
+                    <!-- Player Frames Container -->
+                    <div class="aspect-video-content">
+                        <!-- SERVER 1: TGVid Embed Iframe Engine -->
+                        <iframe 
+                            id="tgvidIframe" 
+                            class="w-full h-full border-0 hidden" 
+                            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer" 
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads allow-modals allow-popups-to-escape-sandbox">
+                        </iframe>
+
+                        <!-- SERVER 2: Professional Netflix-Style HTML5 Video Player Container -->
+                        <div id="customPlayerWrapper" class="relative w-full h-full hidden bg-black group">
+                            <video 
+                                id="floxVideoPlayer" 
+                                class="w-full h-full object-contain cursor-pointer" 
+                                playsinline
+                                crossorigin="anonymous">
+                            </video>
+
+                            <!-- Custom Controls Overlay -->
+                            <div id="customPlayerControls" class="player-controls-overlay absolute inset-0 z-20 flex flex-col justify-end p-3 opacity-100 transition-opacity duration-300">
+                                
+                                <!-- Scrubber Bar with Buffered Bar & Hover Preview Time -->
+                                <div class="relative w-full mb-2 group/scrub cursor-pointer" id="scrubberContainer" onclick="seekVideo(event)">
+                                    <!-- Hover Tooltip -->
+                                    <div id="scrubTooltip" class="absolute -top-7 hidden bg-nexusCard border border-glassBorder text-[10px] text-white px-1.5 py-0.5 rounded shadow -translate-x-1/2">00:00</div>
+                                    <div class="w-full h-1.5 bg-gray-700/80 rounded-full overflow-hidden relative group-hover/scrub:h-2.5 transition-all">
+                                        <!-- Buffered Progress -->
+                                        <div id="playerBufferBar" class="absolute top-0 bottom-0 left-0 bg-gray-500/50 w-0"></div>
+                                        <!-- Played Progress -->
+                                        <div id="playerProgressBar" class="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-electricPurple to-neonPink w-0"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Lower Controls Bar -->
+                                <div class="flex items-center justify-between gap-2 text-white">
+                                    <!-- Left Controls: Play/Pause, Rewind, FastForward, Volume, Timestamp -->
+                                    <div class="flex items-center gap-2 sm:gap-3">
+                                        <button onclick="togglePlayPause()" class="hover:text-cyanGlow transition active:scale-90">
+                                            <i id="playPauseIcon" class="fa-solid fa-play text-base"></i>
+                                        </button>
+                                        <button onclick="skipVideo(-10)" class="hover:text-cyanGlow transition text-xs flex items-center gap-0.5 active:scale-90">
+                                            <i class="fa-solid fa-rotate-left"></i> 10s
+                                        </button>
+                                        <button onclick="skipVideo(10)" class="hover:text-cyanGlow transition text-xs flex items-center gap-0.5 active:scale-90">
+                                            10s <i class="fa-solid fa-rotate-right"></i>
+                                        </button>
+
+                                        <!-- Volume Slider Popout -->
+                                        <div class="relative flex items-center group/vol">
+                                            <button onclick="toggleMute()" class="hover:text-neonPink transition text-xs">
+                                                <i id="volumeIcon" class="fa-solid fa-volume-high"></i>
+                                            </button>
+                                            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" oninput="changeVolume(this.value)" class="w-14 h-1 accent-electricPurple hidden group-hover/vol:block ml-2 cursor-pointer">
+                                        </div>
+
+                                        <span id="playerTimer" class="text-[11px] font-mono text-gray-300">00:00 / 00:00</span>
+                                    </div>
+
+                                    <!-- Right Controls: Speed, Quality Selector, Fullscreen -->
+                                    <div class="flex items-center gap-2">
+                                        <!-- Speed Selector -->
+                                        <select id="speedSelect" onchange="changePlaybackSpeed(this.value)" class="bg-black/60 border border-glassBorder text-gray-300 text-[10px] font-bold rounded px-1 py-0.5 focus:outline-none hover:border-cyanGlow">
+                                            <option value="0.5">0.5x</option>
+                                            <option value="1.0" selected>1.0x</option>
+                                            <option value="1.25">1.25x</option>
+                                            <option value="1.5">1.5x</option>
+                                            <option value="2.0">2.0x</option>
+                                        </select>
+
+                                        <!-- Quality Selector Dropdown -->
+                                        <select id="qualitySelect" onchange="changeFloxQuality(this.value)" class="bg-black/60 border border-glassBorder text-cyanGlow text-[10px] font-bold rounded px-1.5 py-0.5 focus:outline-none hover:border-cyanGlow">
+                                            <option value="1080p" selected>1080p HD</option>
+                                            <option value="720p">720p</option>
+                                            <option value="480p">480p</option>
+                                            <option value="360p">360p</option>
+                                        </select>
+
+                                        <button onclick="toggleLandscapeMode()" class="hover:text-cyanGlow transition text-xs">
+                                            <i class="fa-solid fa-expand"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SERVER SELECTION & QUALITY CONTROL BAR -->
+            <div class="px-4 space-y-3">
+                <div class="glass-panel p-2.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 border border-glassBorder">
+                    <!-- Server Switcher Tabs -->
+                    <div class="flex items-center gap-1 bg-nexusCard p-1 rounded-xl border border-glassBorder w-full sm:w-auto">
+                        <button id="server1Btn" onclick="switchServer(1)" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-electricPurple to-neonPink text-white shadow-glow-purple active:scale-95">
+                            <i class="fa-solid fa-server text-[10px]"></i> Server 1 (TGVid)
+                        </button>
+                        <button id="server2Btn" onclick="switchServer(2)" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-bolt text-[10px]"></i> Server 2 (Netflix Custom MP4)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EPISODES & SEASONS SELECTOR (For TV / Anime) -->
+            <div id="episodeSelectorContainer" class="px-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-neonPink"></i> Episodes
+                    </h4>
+                    <!-- Season Dropdown -->
+                    <select id="seasonSelect" onchange="handleSeasonChange(this.value)" class="bg-nexusCard text-white border border-glassBorder text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-electricPurple">
+                        <option value="1">Season 1</option>
+                    </select>
+                </div>
+
+                <!-- Episodes Grid List -->
+                <div id="episodeGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
+                    <!-- Dynamic Episode Buttons -->
+                </div>
+            </div>
+
+            <!-- DETAILS & METADATA OVERVIEW -->
+            <div class="px-4 space-y-3 pt-2">
+                <div class="glass-panel p-4 rounded-2xl space-y-3 border border-glassBorder">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="detailTitle" class="text-xl font-black text-white tracking-wide">Title</h2>
+                        <div class="flex items-center gap-2">
+                            <span id="detailRating" class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-star text-[10px]"></i> 0.0
+                            </span>
+                            <span id="detailYear" class="bg-nexusCard text-gray-300 text-xs px-2.5 py-0.5 rounded-full border border-glassBorder">YYYY</span>
+                        </div>
+                    </div>
+
+                    <!-- Genre Badges -->
+                    <div id="detailGenres" class="flex flex-wrap gap-1.5"></div>
+
+                    <!-- Plot Overview -->
+                    <p id="detailOverview" class="text-xs text-gray-300 leading-relaxed font-normal">Loading synopsis...</p>
+                </div>
+            </div>
+
+            <!-- "MORE LIKE THIS" RECOMMENDATIONS -->
+            <div class="px-4 space-y-3 pt-2">
+                <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <span class="w-1.5 h-4 bg-cyanGlow rounded-full"></span> MORE LIKE THIS
+                </h4>
+                <div id="recommendationsRow" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                    <!-- Dynamic Recommendations Posters -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FIXED BOTTOM GLASSMORPHIC NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav px-4 py-2">
+        <div class="max-w-md mx-auto flex items-center justify-around">
+            <button id="nav-home" onclick="navigateTo('home')" class="nav-link active flex flex-col items-center gap-1 text-electricPurple transition active:scale-90">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-semibold">Home</span>
+            </button>
+            <button id="nav-movies" onclick="navigateTo('movies')" class="nav-link flex flex-col items-center gap-1 text-gray-400 hover:text-neonPink transition active:scale-90">
+                <i class="fa-solid fa-film text-lg"></i>
+                <span class="text-[10px] font-semibold">Movies</span>
+            </button>
+            <button id="nav-anime" onclick="navigateTo('anime')" class="nav-link flex flex-col items-center gap-1 text-gray-400 hover:text-cyanGlow transition active:scale-90">
+                <i class="fa-solid fa-torii-gate text-lg"></i>
+                <span class="text-[10px] font-semibold">Anime</span>
+            </button>
+            <button id="nav-series" onclick="navigateTo('series')" class="nav-link flex flex-col items-center gap-1 text-gray-400 hover:text-neonPink transition active:scale-90">
+                <i class="fa-solid fa-tv text-lg"></i>
+                <span class="text-[10px] font-semibold">Web Series</span>
+            </button>
+            <button id="nav-watchlist" onclick="navigateTo('watchlist')" class="nav-link flex flex-col items-center gap-1 text-gray-400 hover:text-electricPurple transition active:scale-90">
+                <i class="fa-solid fa-bookmark text-lg"></i>
+                <span class="text-[10px] font-semibold">Watchlist</span>
+            </button>
+        </div>
+    </nav>
+
+
+    <!-- JAVASCRIPT APPLICATION ENGINE -->
+    <script>
+        /* ==================== CONFIGURATION & STATE ==================== */
+        const TMDB_API_KEY = 'a93ff49bdba594ce621f0d0c9585a094';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+        const BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/w1280';
+
+        // Application State
+        let currentView = 'home';
+        let currentItem = null;
+        let contentType = 'tv'; // 'movie' or 'tv'
+        let currentSeason = 1;
+        let currentEpisode = 1;
+        let activeServer = 1; // 1: TGVid, 2: FloxStream
+        let currentFloxQuality = '1080p';
+        let watchlist = JSON.parse(localStorage.getItem('nexus_watchlist') || '[]');
+        let continueWatching = JSON.parse(localStorage.getItem('nexus_continue_watching') || '[]');
+        let searchDebounceTimer = null;
+        let controlsTimeout = null;
+        let lastTapTime = 0;
+        let progressTrackTimer = null;
+        let pendingResumeTime = 0;
+
+        /* ==================== FALLBACK MOCK DATA ==================== */
+        const FALLBACK_DATA = {
+            movies: [
+                { id: 550, title: "Fight Club", poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", backdrop_path: "/hZk233A248pS823P3kS3.jpg", vote_average: 8.4, release_date: "1999-10-15", overview: "A ticking-time-bomb insomniac and a slippery soap salesman build a global organization." },
+                { id: 27205, title: "Inception", poster_path: "/oYu2334.jpg", backdrop_path: "/s3.jpg", vote_average: 8.8, release_date: "2010-07-16", overview: "A thief who steals corporate secrets through the use of dream-sharing technology." }
+            ],
+            anime: [
+                { id: 93405, name: "Squid Game", poster_path: "/dL11O3AZaA1P3R3L3Xp6pP2d6.jpg", backdrop_path: "/2me1P2B1X.jpg", vote_average: 8.4, first_air_date: "2021-09-17", overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games." },
+                { id: 85937, name: "Demon Slayer", poster_path: "/x2LSRK2CmP363332.jpg", backdrop_path: "/nT3.jpg", vote_average: 8.7, first_air_date: "2019-04-06", overview: "Tanjiro Kamado sets out to become a demon slayer." }
+            ],
+            series: [
+                { id: 66732, name: "Stranger Things", poster_path: "/49.jpg", backdrop_path: "/56.jpg", vote_average: 8.6, first_air_date: "2016-07-15", overview: "When a young boy vanishes, a small town uncovers a mystery." }
+            ]
+        };
+
+        /* ==================== AUTO DEVICE OPTIMIZATION ENGINE ==================== */
+        function runDeviceOptimization() {
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            const isLowEndHardware = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+            const isDataSaver = (navigator.connection && navigator.connection.saveData);
+
+            if (isLowEndHardware || isDataSaver) {
+                document.body.classList.add('perf-low');
+                const badge = document.getElementById('perfBadge');
+                if (badge) { badge.classList.remove('hidden'); badge.innerText = 'ECO'; }
+            }
+
+            // Adjust grid padding and player boundaries on landscape/mobile
+            window.addEventListener('resize', adaptPlayerLayout);
+            adaptPlayerLayout();
+        }
+
+        function adaptPlayerLayout() {
+            const wrapper = document.getElementById('playerWrapper');
+            if (window.innerWidth < 640 && window.innerHeight < 500) {
+                // Mobile Landscape Auto Scale
+                wrapper.style.borderRadius = '0px';
+            } else {
+                wrapper.style.borderRadius = '';
+            }
+        }
+
+        /* ==================== LIFECYCLE INITIALIZATION ==================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            runDeviceOptimization();
+            updateWatchlistBadge();
+            renderContinueWatchingRow();
+            loadHomePageData();
+            setupPlayerEventListeners();
+
+            // Click outside search dropdown to close
+            document.addEventListener('click', (e) => {
+                const searchBox = document.getElementById('searchInput');
+                const dropdown = document.getElementById('liveSearchResults');
+                if (searchBox && dropdown && !searchBox.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        });
+
+        /* ==================== CONTINUE WATCHING MANAGEMENT ==================== */
+        function saveProgress(currentTime, duration) {
+            if (!currentItem || !duration || duration <= 0) return;
+            const progress = Math.floor((currentTime / duration) * 100);
+            if (progress < 1) return; // ignore initial seconds
+
+            const existingIdx = continueWatching.findIndex(i => i.id === currentItem.id && i.season === currentSeason && i.episode === currentEpisode);
+            const entry = {
+                id: currentItem.id,
+                title: currentItem.name || currentItem.title || 'Untitled',
+                poster_path: currentItem.poster_path,
+                backdrop_path: currentItem.backdrop_path,
+                type: contentType,
+                season: currentSeason,
+                episode: currentEpisode,
+                currentTime: currentTime,
+                duration: duration,
+                progress: progress,
+                timestamp: Date.now()
+            };
+
+            if (existingIdx >= 0) continueWatching.splice(existingIdx, 1);
+            continueWatching.unshift(entry);
+            continueWatching = continueWatching.slice(0, 10); // Keep top 10
+
+            localStorage.setItem('nexus_continue_watching', JSON.stringify(continueWatching));
+            renderContinueWatchingRow();
+        }
+
+        function renderContinueWatchingRow() {
+            const section = document.getElementById('continueWatchingSection');
+            const row = document.getElementById('continueWatchingRow');
+
+            if (!continueWatching || continueWatching.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            row.innerHTML = continueWatching.map(item => {
+                const backdrop = item.backdrop_path ? `${IMAGE_BASE_URL}${item.backdrop_path}` : 'https://placehold.co/300x170/0f131d/7000FF?text=NEXUS';
+                const epLabel = item.type === 'tv' ? `S${item.season} E${item.episode}` : 'Movie';
+
+                return `
+                    <div onclick="resumeContent(${item.id}, '${item.type}', ${item.season}, ${item.episode}, ${item.currentTime})" class="flex-none w-44 sm:w-52 space-y-1.5 cursor-pointer interactive-card group">
+                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-glassBorder shadow-md group-hover:border-cyanGlow transition">
+                            <img src="${backdrop}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">
+                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <div class="w-9 h-9 rounded-full bg-electricPurple/90 text-white flex items-center justify-center shadow-glow-purple">
+                                    <i class="fa-solid fa-play text-xs pl-0.5"></i>
+                                </div>
+                            </div>
+                            <span class="absolute top-2 left-2 bg-black/70 backdrop-blur-md text-cyanGlow text-[9px] font-bold px-2 py-0.5 rounded-full border border-cyanGlow/30">${epLabel}</span>
+                            <div class="absolute bottom-0 inset-x-0 h-1 bg-gray-800">
+                                <div class="h-full bg-gradient-to-r from-electricPurple to-neonPink" style="width: ${item.progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-white truncate max-w-[130px] group-hover:text-cyanGlow">${item.title}</h4>
+                            <span class="text-[9px] font-mono text-gray-400">${item.progress}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resumeContent(tmdbId, type, season, episode, timestamp) {
+            pendingResumeTime = timestamp || 0;
+            currentSeason = season || 1;
+            currentEpisode = episode || 1;
+            openPlayerWithId(tmdbId, type);
+        }
+
+        function clearContinueWatching() {
+            continueWatching = [];
+            localStorage.removeItem('nexus_continue_watching');
+            renderContinueWatchingRow();
+        }
+
+        /* ==================== API FETCH HELPER ==================== */
+        async function fetchTMDB(endpoint) {
+            try {
+                const separator = endpoint.includes('?') ? '&' : '?';
+                const response = await fetch(`${TMDB_BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}`);
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                return await response.json();
+            } catch (err) {
+                console.warn(`TMDB API Fetch Warning (${endpoint}):`, err);
+                return null;
+            }
+        }
+
+        /* ==================== HOME PAGE DATA LOADER ==================== */
+        async function loadHomePageData() {
+            const [trendingData, moviesData, animeData, seriesData, topData] = await Promise.all([
+                fetchTMDB('/trending/all/day'),
+                fetchTMDB('/movie/popular'),
+                fetchTMDB('/discover/tv?with_genres=16&sort_by=popularity.desc'),
+                fetchTMDB('/tv/popular'),
+                fetchTMDB('/tv/top_rated')
+            ]);
+
+            const trendingList = trendingData?.results || FALLBACK_DATA.series;
+            const animeList = animeData?.results || FALLBACK_DATA.anime;
+            const seriesList = seriesData?.results || FALLBACK_DATA.series;
+            const topRatedList = topData?.results || FALLBACK_DATA.anime;
+
+            if (trendingList.length > 0) renderHeroBanner(trendingList[0]);
+
+            renderTop10Row(trendingList.slice(0, 10));
+            renderPosterRow('animeRow', animeList);
+            renderPosterRow('seriesRow', seriesList);
+            renderPosterRow('topRatedRow', topRatedList);
+        }
+
+        /* ==================== HERO BANNER RENDERER ==================== */
+        function renderHeroBanner(item) {
+            const backdrop = item.backdrop_path ? `${BACKDROP_BASE_URL}${item.backdrop_path}` : 'https://placehold.co/1280x720/0f131d/7000FF?text=NEXUS+CinemaOS';
+            const title = item.name || item.title || 'Featured Content';
+            const rating = item.vote_average ? item.vote_average.toFixed(1) : '8.5';
+            const year = (item.first_air_date || item.release_date || '2024').substring(0, 4);
+            const isMovie = item.media_type === 'movie' || !!item.title;
+            const typeLabel = isMovie ? 'MOVIE' : 'TV SERIES';
+            const overview = item.overview ? (item.overview.length > 140 ? item.overview.substring(0, 140) + '...' : item.overview) : 'Stream on NEXUS CinemaOS.';
+
+            const heroHTML = `
+                <img src="${backdrop}" alt="${title}" class="w-full h-full object-cover object-center absolute inset-0">
+                <div class="absolute inset-0 bg-gradient-to-t from-nexusBg via-nexusBg/50 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-nexusBg via-transparent to-transparent"></div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-8 space-y-3 max-w-2xl">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gradient-to-r from-electricPurple to-neonPink text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow-glow-purple tracking-widest">
+                            🔥 #1 TRENDING
+                        </span>
+                        <span class="bg-nexusCard/80 border border-glassBorder text-cyanGlow text-[10px] font-bold px-2 py-0.5 rounded-full">${typeLabel}</span>
+                        <span class="bg-black/60 border border-amber-500/40 text-amber-300 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-md">★ ${rating}</span>
+                        <span class="text-xs font-semibold text-gray-300">${year}</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl font-black text-white leading-tight tracking-wide drop-shadow-md">${title}</h1>
+                    <p class="text-xs text-gray-300 hidden sm:block line-clamp-2">${overview}</p>
+
+                    <div class="flex items-center gap-3 pt-1">
+                        <button onclick="openPlayerWithId(${item.id}, '${isMovie ? 'movie' : 'tv'}')" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-electricPurple via-neonPink to-cyanGlow text-white text-xs font-black flex items-center gap-2 shadow-glow-purple hover:scale-105 active:scale-95 transition transform">
+                            <i class="fa-solid fa-play text-sm"></i> WATCH NOW
+                        </button>
+                        <button onclick='toggleWatchlistFromObj(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="p-2.5 rounded-full glass-panel text-white hover:text-neonPink transition active:scale-90">
+                            <i class="${isInWatchlist(item.id) ? 'fa-solid text-neonPink' : 'fa-regular'} fa-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('heroBanner').innerHTML = heroHTML;
+        }
+
+        /* ==================== TOP 10 RANKED SECTION ==================== */
+        function renderTop10Row(items) {
+            const container = document.getElementById('top10Row');
+            container.innerHTML = items.map((item, index) => {
+                const poster = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placehold.co/300x450/0f131d/ffffff?text=Poster';
+                const rating = item.vote_average ? item.vote_average.toFixed(1) : '8.0';
+                const isMovie = item.media_type === 'movie' || !!item.title;
+                return `
+                    <div onclick="openPlayerWithId(${item.id}, '${isMovie ? 'movie' : 'tv'}')" class="relative flex-none w-36 sm:w-44 cursor-pointer interactive-card group">
+                        <div class="relative w-full h-52 sm:h-64 rounded-2xl overflow-hidden border border-glassBorder shadow-lg group-hover:border-electricPurple transition duration-300">
+                            <img src="${poster}" alt="${item.name || item.title}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy">
+                            <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-400 border border-amber-500/30">★ ${rating}</div>
+                        </div>
+                        <span class="rank-number absolute -bottom-3 -left-3 pointer-events-none select-none">${index + 1}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ==================== STANDARD POSTER ROW RENDERER ==================== */
+        function renderPosterRow(containerId, items) {
+            const container = document.getElementById(containerId);
+            if (!items || items.length === 0) {
+                container.innerHTML = `<span class="text-xs text-gray-500">No content available</span>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const poster = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placehold.co/300x450/0f131d/ffffff?text=Poster';
+                const title = item.name || item.title || 'Untitled';
+                const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
+                const year = (item.first_air_date || item.release_date || '2024').substring(0, 4);
+                const isMovie = !!item.title;
+
+                return `
+                    <div onclick="openPlayerWithId(${item.id}, '${isMovie ? 'movie' : 'tv'}')" class="flex-none w-28 sm:w-36 space-y-2 cursor-pointer interactive-card group">
+                        <div class="relative w-full h-40 sm:h-52 rounded-xl overflow-hidden border border-glassBorder shadow-md group-hover:border-neonPink transition duration-300">
+                            <img src="${poster}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+                            <div class="absolute bottom-0 inset-x-0 p-1.5 gradient-overlay flex items-center justify-between text-[10px]">
+                                <span class="bg-black/70 text-amber-400 font-bold px-1.5 py-0.5 rounded border border-amber-500/30">★ ${rating}</span>
+                                <span class="text-gray-300 text-[9px] font-semibold">${year}</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xs font-semibold text-gray-200 truncate group-hover:text-cyanGlow transition">${title}</h3>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ==================== SEARCH & AUTOCOMPLETE ==================== */
+        function handleSearchInput(e) {
+            const query = e.target.value.trim();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const dropdown = document.getElementById('liveSearchResults');
+
+            if (query.length > 0) clearBtn.classList.remove('hidden');
+            else { clearBtn.classList.add('hidden'); dropdown.classList.add('hidden'); return; }
+
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(async () => {
+                const results = await fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
+                renderLiveSearchResults(results?.results || []);
+            }, 300);
+        }
+
+        function showLiveSearchDropdown() {
+            if (document.getElementById('searchInput').value.trim().length > 0) {
+                document.getElementById('liveSearchResults').classList.remove('hidden');
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            document.getElementById('liveSearchResults').classList.add('hidden');
+        }
+
+        function renderLiveSearchResults(items) {
+            const dropdown = document.getElementById('liveSearchResults');
+            const container = document.getElementById('liveSearchContent');
+            dropdown.classList.remove('hidden');
+
+            const filtered = items.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
+            if (!filtered || filtered.length === 0) {
+                container.innerHTML = `<div class="p-3 text-xs text-gray-400 text-center">No matching media found.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.slice(0, 6).map(item => {
+                const poster = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placehold.co/100x150/0f131d/ffffff?text=N/A';
+                const title = item.name || item.title || 'Untitled';
+                const year = (item.first_air_date || item.release_date || '2024').substring(0, 4);
+                const isMovie = item.media_type === 'movie';
+                return `
+                    <div onclick="openPlayerWithId(${item.id}, '${isMovie ? 'movie' : 'tv'}'); clearSearch();" class="flex items-center gap-3 p-1.5 hover:bg-nexusCard/80 rounded-xl cursor-pointer transition">
+                        <img src="${poster}" alt="${title}" class="w-10 h-14 object-cover rounded-lg">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-white truncate">${title}</h4>
+                            <p class="text-[10px] text-gray-400">${year} • ${isMovie ? 'Movie' : 'TV Series'}</p>
+                        </div>
+                        <span class="text-[10px] text-amber-400 font-bold px-1.5 py-0.5 bg-amber-500/10 rounded">★ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ==================== ROUTING ==================== */
+        function navigateTo(view) {
+            currentView = view;
+            document.getElementById('catalogView').classList.add('hidden');
+            document.getElementById('gridView').classList.add('hidden');
+            document.getElementById('playerDetailsView').classList.add('hidden');
+
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('text-electricPurple', 'text-cyanGlow', 'text-neonPink');
+                btn.classList.add('text-gray-400');
+            });
+
+            if (view === 'home') {
+                document.getElementById('catalogView').classList.remove('hidden');
+                document.getElementById('nav-home').classList.add('text-electricPurple');
+            } else if (view === 'movies') {
+                document.getElementById('gridView').classList.remove('hidden');
+                document.getElementById('nav-movies').classList.add('text-neonPink');
+                loadCategoryGrid('/movie/popular', '🎬 Popular Movies');
+            } else if (view === 'anime') {
+                document.getElementById('gridView').classList.remove('hidden');
+                document.getElementById('nav-anime').classList.add('text-cyanGlow');
+                loadCategoryGrid('/discover/tv?with_genres=16&sort_by=popularity.desc', '⛩️ Anime Library');
+            } else if (view === 'series') {
+                document.getElementById('gridView').classList.remove('hidden');
+                document.getElementById('nav-series').classList.add('text-neonPink');
+                loadCategoryGrid('/tv/popular', '📺 Popular Web Series');
+            } else if (view === 'watchlist') {
+                document.getElementById('gridView').classList.remove('hidden');
+                document.getElementById('nav-watchlist').classList.add('text-electricPurple');
+                renderWatchlistGrid();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==================== GRID VIEW ==================== */
+        async function loadCategoryGrid(endpoint, title) {
+            document.getElementById('gridTitle').innerHTML = `<i class="fa-solid fa-film text-electricPurple"></i> ${title}`;
+            document.getElementById('gridContainer').innerHTML = `<div class="col-span-full py-12 text-center text-xs text-cyanGlow pulse-loader"><i class="fa-solid fa-spinner animate-spin text-lg block mb-2"></i> Fetching CinemaOS Catalog...</div>`;
+
+            const data = await fetchTMDB(endpoint);
+            const results = data?.results || [];
+
+            document.getElementById('gridCount').innerText = `${results.length} Titles`;
+            renderGridItems(results);
+        }
+
+        function renderGridItems(items) {
+            const container = document.getElementById('gridContainer');
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-xs">No media titles found.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const poster = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placehold.co/300x450/0f131d/ffffff?text=Poster';
+                const title = item.name || item.title || 'Untitled';
+                const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
+                const year = (item.first_air_date || item.release_date || '2024').substring(0, 4);
+                const isMovie = !!item.title;
+
+                return `
+                    <div onclick="openPlayerWithId(${item.id}, '${isMovie ? 'movie' : 'tv'}')" class="space-y-1.5 cursor-pointer interactive-card group">
+                        <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden border border-glassBorder group-hover:border-electricPurple transition">
+                            <img src="${poster}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">
+                            <div class="absolute top-2 right-2 bg-black/70 px-1.5 py-0.5 rounded text-[10px] font-bold text-amber-400">★ ${rating}</div>
+                        </div>
+                        <h4 class="text-xs font-bold text-white truncate group-hover:text-cyanGlow">${title}</h4>
+                        <p class="text-[10px] text-gray-400">${year} • ${isMovie ? 'Movie' : 'TV'}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterCategory(cat) {
+            if (cat === 'all') navigateTo('home');
+            else if (cat === 'movies') navigateTo('movies');
+            else if (cat === 'anime') navigateTo('anime');
+            else if (cat === 'series') navigateTo('series');
+            else if (cat === 'toprated') {
+                document.getElementById('gridView').classList.remove('hidden');
+                document.getElementById('catalogView').classList.add('hidden');
+                loadCategoryGrid('/tv/top_rated', '⭐ Critically Acclaimed');
+            }
+        }
+
+        /* ==================== DETAILS & PLAYER SCREEN ENGINE ==================== */
+        async function openPlayerWithId(tmdbId, type = 'tv') {
+            contentType = type;
+            document.getElementById('catalogView').classList.add('hidden');
+            document.getElementById('gridView').classList.add('hidden');
+            document.getElementById('playerDetailsView').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const endpoint = contentType === 'movie' ? `/movie/${tmdbId}` : `/tv/${tmdbId}`;
+            const details = await fetchTMDB(endpoint);
+            currentItem = details || { id: tmdbId, title: 'CinemaOS Movie', vote_average: 8.5, overview: 'Direct Stream.' };
+
+            const epContainer = document.getElementById('episodeSelectorContainer');
+            if (contentType === 'movie') {
+                epContainer.classList.add('hidden');
+            } else {
+                epContainer.classList.remove('hidden');
+                if (!pendingResumeTime) {
+                    currentSeason = 1;
+                    currentEpisode = 1;
+                }
+                setupSeasonSelector(currentItem.number_of_seasons || 1);
+            }
+
+            const title = currentItem.name || currentItem.title || 'Now Playing';
+            document.getElementById('playerHeaderTitle').innerText = title;
+            document.getElementById('detailTitle').innerText = title;
+            document.getElementById('detailRating').innerHTML = `<i class="fa-solid fa-star text-[10px]"></i> ${currentItem.vote_average ? currentItem.vote_average.toFixed(1) : '8.5'}`;
+            document.getElementById('detailYear').innerText = (currentItem.first_air_date || currentItem.release_date || '2024').substring(0, 4);
+            document.getElementById('detailOverview').innerText = currentItem.overview || 'No synopsis available.';
+
+            updateDetailBookmarkIcon();
+            loadRecommendations(tmdbId);
+            loadStreamPlayer();
+        }
+
+        function closePlayerView() {
+            clearInterval(progressTrackTimer);
+            const vid = document.getElementById('floxVideoPlayer');
+            if (vid.currentTime > 0) saveProgress(vid.currentTime, vid.duration);
+            vid.pause();
+            vid.src = '';
+            document.getElementById('tgvidIframe').src = '';
+            document.getElementById('playerDetailsView').classList.add('hidden');
+
+            if (currentView === 'home') document.getElementById('catalogView').classList.remove('hidden');
+            else document.getElementById('gridView').classList.remove('hidden');
+        }
+
+        function setupSeasonSelector(seasonCount) {
+            const seasonSelect = document.getElementById('seasonSelect');
+            seasonSelect.innerHTML = '';
+            for (let i = 1; i <= Math.min(seasonCount, 25); i++) {
+                seasonSelect.innerHTML += `<option value="${i}">Season ${i}</option>`;
+            }
+            seasonSelect.value = currentSeason;
+            renderEpisodeGrid(currentSeason, 24);
+        }
+
+        function handleSeasonChange(seasonNum) {
+            currentSeason = parseInt(seasonNum);
+            currentEpisode = 1;
+            renderEpisodeGrid(currentSeason, 24);
+            loadStreamPlayer();
+        }
+
+        function renderEpisodeGrid(season, count) {
+            const grid = document.getElementById('episodeGrid');
+            grid.innerHTML = '';
+            for (let ep = 1; ep <= count; ep++) {
+                const isActive = ep === currentEpisode;
+                grid.innerHTML += `
+                    <button onclick="selectEpisode(${ep})" class="px-2 py-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center border active:scale-95 ${isActive ? 'bg-gradient-to-r from-electricPurple to-neonPink text-white border-electricPurple shadow-glow-purple' : 'bg-nexusCard text-gray-300 border-glassBorder hover:border-cyanGlow'}">
+                        <span>EP ${ep}</span>
+                    </button>
+                `;
+            }
+        }
+
+        function selectEpisode(epNum) {
+            currentEpisode = epNum;
+            pendingResumeTime = 0;
+            renderEpisodeGrid(currentSeason, 24);
+            loadStreamPlayer();
+        }
+
+        /* ==================== DUAL STREAM PLAYER ENGINE ==================== */
+        function loadStreamPlayer() {
+            const loadingOverlay = document.getElementById('playerLoadingState');
+            loadingOverlay.classList.remove('hidden');
+            clearInterval(progressTrackTimer);
+
+            const tgvidIframe = document.getElementById('tgvidIframe');
+            const customPlayerWrapper = document.getElementById('customPlayerWrapper');
+            const floxVideoPlayer = document.getElementById('floxVideoPlayer');
+
+            if (activeServer === 1) {
+                // Server 1: TGVid Embed
+                customPlayerWrapper.classList.add('hidden');
+                floxVideoPlayer.pause();
+
+                const embedUrl = contentType === 'movie' 
+                    ? `https://tgvid.lovable.app/embed/movie/${currentItem.id}`
+                    : `https://tgvid.lovable.app/embed/tv/${currentItem.id}/${currentSeason}/${currentEpisode}`;
+
+                tgvidIframe.src = embedUrl;
+                tgvidIframe.classList.remove('hidden');
+                setTimeout(() => { loadingOverlay.classList.add('hidden'); }, 800);
+
+            } else {
+                // Server 2: Custom Netflix HTML5 Player
+                tgvidIframe.classList.add('hidden');
+                tgvidIframe.src = '';
+                customPlayerWrapper.classList.remove('hidden');
+
+                const targetSeek = pendingResumeTime || floxVideoPlayer.currentTime || 0;
+                const streamUrl = contentType === 'movie'
+                    ? `https://floxstream.lovable.app/floxapi/${currentItem.id}?raw=1&quality=${currentFloxQuality}`
+                    : `https://floxstream.lovable.app/floxapi/${currentItem.id}/${currentSeason}/${currentEpisode}?raw=1&quality=${currentFloxQuality}`;
+
+                floxVideoPlayer.src = streamUrl;
+
+                floxVideoPlayer.onloadedmetadata = () => {
+                    loadingOverlay.classList.add('hidden');
+                    if (targetSeek > 0) {
+                        floxVideoPlayer.currentTime = targetSeek;
+                        pendingResumeTime = 0; // reset resume target
+                    }
+                    floxVideoPlayer.play().then(() => updatePlayPauseUI(true)).catch(() => updatePlayPauseUI(false));
+                };
+
+                floxVideoPlayer.onerror = () => {
+                    loadingOverlay.innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-gray-300">FloxStream Direct MP4 stream unreachable.</p>
+                            <button onclick="switchServer(1)" class="mt-2 text-xs bg-electricPurple text-white px-3 py-1 rounded-lg shadow-glow-purple">Switch to Server 1</button>
+                        </div>
+                    `;
+                };
+
+                // Auto Track Progress every 4 seconds
+                progressTrackTimer = setInterval(() => {
+                    if (floxVideoPlayer && !floxVideoPlayer.paused && floxVideoPlayer.currentTime > 0) {
+                        saveProgress(floxVideoPlayer.currentTime, floxVideoPlayer.duration);
+                    }
+                }, 4000);
+            }
+        }
+
+        function switchServer(serverNum) {
+            activeServer = serverNum;
+            document.getElementById('server1Btn').className = serverNum === 1 
+                ? 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-electricPurple to-neonPink text-white shadow-glow-purple'
+                : 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition flex items-center justify-center gap-1.5';
+            document.getElementById('server2Btn').className = serverNum === 2
+                ? 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-electricPurple to-neonPink text-white shadow-glow-purple'
+                : 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition flex items-center justify-center gap-1.5';
+
+            loadStreamPlayer();
+        }
+
+        function changeFloxQuality(quality) {
+            currentFloxQuality = quality;
+            if (activeServer === 2) loadStreamPlayer();
+        }
+
+        /* ==================== CUSTOM NETFLIX PLAYER CONTROLS & GESTURES ==================== */
+        function setupPlayerEventListeners() {
+            const player = document.getElementById('floxVideoPlayer');
+            const wrapper = document.getElementById('customPlayerWrapper');
+            const controls = document.getElementById('customPlayerControls');
+
+            player.addEventListener('timeupdate', updateProgress);
+            player.addEventListener('ended', () => {
+                updatePlayPauseUI(false);
+                saveProgress(player.duration, player.duration);
+            });
+
+            // Auto Hide Controls Inactivity Timer
+            const resetControlsTimer = () => {
+                controls.style.opacity = '1';
+                clearTimeout(controlsTimeout);
+                if (!player.paused) {
+                    controlsTimeout = setTimeout(() => {
+                        controls.style.opacity = '0';
+                    }, 3000);
+                }
+            };
+
+            wrapper.addEventListener('mousemove', resetControlsTimer);
+            wrapper.addEventListener('touchstart', resetControlsTimer);
+
+            // Double Click / Tap Gestures (+10s / -10s)
+            wrapper.addEventListener('click', (e) => {
+                if (e.target.closest('#customPlayerControls')) return;
+                const now = Date.now();
+                const rect = wrapper.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+
+                if (now - lastTapTime < 300) {
+                    if (clickX < rect.width / 2) {
+                        skipVideo(-10);
+                        triggerRipple('rippleLeft');
+                    } else {
+                        skipVideo(10);
+                        triggerRipple('rippleRight');
+                    }
+                } else {
+                    togglePlayPause();
+                }
+                lastTapTime = now;
+            });
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('playerDetailsView').classList.contains('hidden') || activeServer !== 2) return;
+                if (['Space', 'KeyK'].includes(e.code)) { e.preventDefault(); togglePlayPause(); }
+                else if (e.code === 'ArrowRight') { skipVideo(5); }
+                else if (e.code === 'ArrowLeft') { skipVideo(-5); }
+                else if (e.code === 'ArrowUp') { changeVolume(Math.min(1, player.volume + 0.1)); }
+                else if (e.code === 'ArrowDown') { changeVolume(Math.max(0, player.volume - 0.1)); }
+                else if (e.code === 'KeyF') { toggleLandscapeMode(); }
+                else if (e.code === 'KeyM') { toggleMute(); }
+            });
+        }
+
+        function triggerRipple(elementId) {
+            const elem = document.getElementById(elementId);
+            elem.classList.remove('hidden');
+            setTimeout(() => elem.classList.add('hidden'), 600);
+        }
+
+        function togglePlayPause() {
+            const player = document.getElementById('floxVideoPlayer');
+            if (player.paused) {
+                player.play();
+                updatePlayPauseUI(true);
+            } else {
+                player.pause();
+                updatePlayPauseUI(false);
+            }
+        }
+
+        function updatePlayPauseUI(isPlaying) {
+            const icon = document.getElementById('playPauseIcon');
+            icon.className = isPlaying ? 'fa-solid fa-pause text-base' : 'fa-solid fa-play text-base';
+        }
+
+        function skipVideo(seconds) {
+            const player = document.getElementById('floxVideoPlayer');
+            player.currentTime = Math.max(0, Math.min(player.duration || 0, player.currentTime + seconds));
+        }
+
+        function updateProgress() {
+            const player = document.getElementById('floxVideoPlayer');
+            if (!player.duration) return;
+
+            const playedPercent = (player.currentTime / player.duration) * 100;
+            document.getElementById('playerProgressBar').style.width = `${playedPercent}%`;
+
+            if (player.buffered.length > 0) {
+                const bufferedPercent = (player.buffered.end(player.buffered.length - 1) / player.duration) * 100;
+                document.getElementById('playerBufferBar').style.width = `${bufferedPercent}%`;
+            }
+
+            document.getElementById('playerTimer').innerText = `${formatTime(player.currentTime)} / ${formatTime(player.duration)}`;
+        }
+
+        function seekVideo(e) {
+            const player = document.getElementById('floxVideoPlayer');
+            const container = document.getElementById('scrubberContainer');
+            const rect = container.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            player.currentTime = pos * player.duration;
+        }
+
+        function changeVolume(val) {
+            const player = document.getElementById('floxVideoPlayer');
+            player.volume = val;
+            document.getElementById('volumeSlider').value = val;
+            const icon = document.getElementById('volumeIcon');
+            if (val == 0) icon.className = 'fa-solid fa-volume-xmark';
+            else if (val < 0.5) icon.className = 'fa-solid fa-volume-low';
+            else icon.className = 'fa-solid fa-volume-high';
+        }
+
+        function toggleMute() {
+            const player = document.getElementById('floxVideoPlayer');
+            player.muted = !player.muted;
+            changeVolume(player.muted ? 0 : player.volume || 1);
+        }
+
+        function changePlaybackSpeed(speed) {
+            document.getElementById('floxVideoPlayer').playbackRate = parseFloat(speed);
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        /* ==================== LANDSCAPE & RECOMMENDATIONS ==================== */
+        function toggleLandscapeMode() {
+            const wrapper = document.getElementById('playerWrapper');
+            const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+            const isPseudoFs = wrapper.classList.contains('pseudo-fullscreen');
+
+            if (!isNativeFs && !isPseudoFs) {
+                // Enter Fullscreen Mode
+                document.body.classList.add('fullscreen-active');
+                
+                const requestFs = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen || wrapper.mozRequestFullScreen || wrapper.msRequestFullscreen;
+                
+                if (requestFs) {
+                    requestFs.call(wrapper).catch(() => {
+                        wrapper.classList.add('pseudo-fullscreen');
+                    });
+                } else {
+                    wrapper.classList.add('pseudo-fullscreen');
+                }
+
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
+                }
+            } else {
+                // Exit Fullscreen Mode
+                document.body.classList.remove('fullscreen-active');
+                
+                const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+                
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+                    if (exitFs) exitFs.call(document).catch(() => {});
+                }
+                
+                wrapper.classList.remove('pseudo-fullscreen');
+
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            }
+        }
+
+        // Listen for native escape / swipe exit fullscreen events
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+            const wrapper = document.getElementById('playerWrapper');
+            if (!isFs) {
+                wrapper.classList.remove('pseudo-fullscreen');
+                document.body.classList.remove('fullscreen-active');
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            }
+        }
+
+        async function loadRecommendations(tmdbId) {
+            const endpoint = contentType === 'movie' ? `/movie/${tmdbId}/similar` : `/tv/${tmdbId}/similar`;
+            const data = await fetchTMDB(endpoint);
+            renderPosterRow('recommendationsRow', data?.results?.slice(0, 8) || []);
+        }
+
+        /* ==================== WATCHLIST ==================== */
+        function isInWatchlist(id) { return watchlist.some(item => item.id === id); }
+        function toggleCurrentWatchlist() { if (currentItem) toggleWatchlistFromObj(currentItem); updateDetailBookmarkIcon(); }
+        function toggleWatchlistFromObj(item) {
+            const idx = watchlist.findIndex(w => w.id === item.id);
+            if (idx >= 0) watchlist.splice(idx, 1);
+            else watchlist.push(item);
+            localStorage.setItem('nexus_watchlist', JSON.stringify(watchlist));
+            updateWatchlistBadge();
+            if (currentView === 'watchlist') renderWatchlistGrid();
+        }
+        function updateWatchlistBadge() { document.getElementById('headerWatchlistBadge').innerText = watchlist.length; }
+        function updateDetailBookmarkIcon() {
+            document.getElementById('detailBookmarkBtn').innerHTML = (currentItem && isInWatchlist(currentItem.id))
+                ? `<i class="fa-solid fa-bookmark text-neonPink text-sm"></i>`
+                : `<i class="fa-regular fa-bookmark text-gray-300 text-sm"></i>`;
+        }
+        function renderWatchlistGrid() {
+            document.getElementById('gridTitle').innerHTML = `<i class="fa-solid fa-bookmark text-neonPink"></i> My Watchlist`;
+            document.getElementById('gridCount').innerText = `${watchlist.length} Saved Items`;
+            renderGridItems(watchlist);
+        }
+    </script>
+</body>
+</html>
